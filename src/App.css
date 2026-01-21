@@ -36,3 +36,294 @@
     transform: rotate(360deg);
   }
 }
+/* Reset nhẹ */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #111 0%, #000 60%);
+  color: #e5e7eb;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif;
+}
+
+/* Container chính */
+.App {
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(0, 255, 170, 0.15);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 170, 0.05),
+    0 20px 40px rgba(0, 0, 0, 0.8);
+}
+
+/* Tiêu đề */
+h2 {
+  margin-bottom: 24px;
+  color: #7fffd4;
+  letter-spacing: 0.5px;
+}
+
+/* Label */
+label {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Input / textarea */
+input,
+textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.8);
+  color: #f9fafb;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280;
+}
+
+input:focus,
+textarea:focus {
+  border-color: rgba(0, 255, 170, 0.6);
+  box-shadow: 0 0 0 1px rgba(0, 255, 170, 0.4);
+}
+
+/* Button */
+button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 170, 0.6);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 255, 170, 0.25),
+    rgba(0, 255, 170, 0.05)
+  );
+  color: #a7f3d0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 170, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.8);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Error */
+p {
+  font-size: 0.9rem;
+}
+
+/* Output JSON */
+pre {
+  margin-top: 18px;
+  background: #020202;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 170, 0.25);
+  padding: 16px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #6ee7b7;
+  box-shadow: inset 0 0 0 1px rgba(0, 255, 170, 0.08);
+}
+
+/* Scrollbar tinh tế */
+pre::-webkit-scrollbar {
+  width: 8px;
+}
+
+pre::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 170, 0.3);
+  border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* Split layout */
+.app-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Panel chung */
+.panel {
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(0, 255, 170, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 170, 0.05),
+    0 20px 40px rgba(0, 0, 0, 0.8);
+}
+
+/* Left / Right subtle difference */
+.panel.left {
+  border-left: 4px solid rgba(0, 255, 170, 0.6);
+}
+
+.panel.right {
+  border-left: 4px solid rgba(110, 231, 183, 0.6);
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.actions button {
+  flex: 1;
+}
+
+/* Primary upload button */
+button.primary {
+  background: linear-gradient(
+    180deg,
+    rgba(59, 130, 246, 0.4),
+    rgba(59, 130, 246, 0.15)
+  );
+  border-color: rgba(59, 130, 246, 0.8);
+  color: #dbeafe;
+}
+
+/* Error */
+.error {
+  margin-top: 12px;
+  color: #fca5a5;
+}
+
+/* Responsive: mobile stack */
+@media (max-width: 900px) {
+  .app-split {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== JSON VIEWER – LEFT ALIGNED, CLEAN ===== */
+
+.json-viewer {
+  margin-top: 16px;
+  background: #020202;
+  border: 1px solid rgba(0, 255, 170, 0.25);
+  border-radius: 10px;
+  padding: 16px;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #e5e7eb;
+  overflow-x: auto;
+}
+
+/* mỗi dòng JSON */
+.json-row {
+  display: grid;
+  grid-template-columns: max-content 12px 1fr;
+  gap: 6px;
+  padding: 2px 0;
+  align-items: flex-start;
+}
+
+/* key – CANH TRÁI */
+.json-key {
+  color: #7dd3fc;
+  white-space: nowrap;
+  text-align: left;      /* ⭐ canh trái */
+}
+
+/* dấu : */
+.json-sep {
+  color: #9ca3af;
+}
+
+/* value */
+.json-value {
+  color: #6ee7b7;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+/* Row cho rotate + status */
+.rotate-row {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 20px;
+  margin-top: 28px;
+}
+
+/* Form rotate */
+.rotate-form {
+  border-color: rgba(234, 179, 8, 0.35);
+}
+
+/* Status box */
+.rotate-status {
+  background: rgba(0, 0, 0, 0.45);
+  border-color: rgba(110, 231, 183, 0.35);
+}
+
+/* Status text */
+.status {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.status.muted {
+  color: #9ca3af;
+}
+
+.status.success {
+  color: #6ee7b7;
+}
+
+.status.error {
+  color: #fca5a5;
+}
+
+/* Status list */
+.status-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.status-list li {
+  padding: 4px 0;
+  color: #a7f3d0;
+}
+
+/* Responsive: mobile thì xếp dọc */
+@media (max-width: 900px) {
+  .rotate-row {
+    grid-template-columns: 1fr;
+  }
+}
