@@ -1,489 +1,79 @@
-import { useState } from "react";
-import "./App.css";
-import { createSampleDocClient } from "./crypto/createSampleDocClient";
-import { rotateKEKForDoiTuongsClient } from "./crypto/rotateKEKForDoiTuongsClient";
+import React, { useEffect, useState } from 'react';
+import { Navigate, Route, Routes } from "react-router-dom";
+import LoginPage from './screens/LoginPage';
+import HomePage from './screens/HomePage';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { auth, db } from './firebase.config';
+import { doc, getDoc } from 'firebase/firestore';
+import { UserModel } from './model/UserModel';
+import { handleToastWarn } from './constants/handleToast';
+import SpinnerComponent from './components/SpinnerComponent';
+import useUserStore from './zustand/useUserStore';
 
-function App() {
-  const [uid, setUid] = useState("");
-  const [secret, setSecret] = useState("");
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [plaintext, setPlaintext] = useState("");
-  const [encryptedDoc, setEncryptedDoc] = useState<any>(null);
-  const [uploadStatus, setUploadStatus] = useState<string>("");
-  const [error, setError] = useState<string>("");
+type AuthState = {
+  user: User | null;
+  isLoading: boolean;
+};
 
-  const [rotateStatus, setRotateStatus] = useState<{
-    total: number;
-    success: number;
-    failed: number;
-    running: boolean;
-    lastRun?: number;
-  }>({
-    total: 0,
-    success: 0,
-    failed: 0,
-    running: false,
+export default function App() {
+  const { setUser } = useUserStore();
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    isLoading: true,
   });
-  const [uidRotate, setUidRotate] = useState("");
-  const [oldSecret, setOldSecret] = useState("");
-  const [newSecret, setNewSecret] = useState("");
+  
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (currentUser) => {
+      setAuthState({ user: currentUser, isLoading: false });
 
-  const handleCreate = async () => {
-    setError("");
-    setEncryptedDoc(null);
-
-    if (!uid || !secret || !name || !address || !plaintext) {
-      setError("❌ Vui lòng nhập đầy đủ các trường");
-      return;
-    }
-
-    try {
-      const encryptedDoc = await createSampleDocClient({
-        uid,
-        secret,
-        name,
-        address,
-        plaintext,
-      });
-
-      setEncryptedDoc(encryptedDoc);
-    } catch (e: any) {
-      console.error(e);
-      setError("❌ Lỗi khi mã hoá dữ liệu");
-    }
-  };
-
-  const uploadEncryptedDoc = async (encryptedDoc: any) => {
-    const res = await fetch(
-      "https://asia-southeast1-infojs-c6205.cloudfunctions.net/uploadEncryptedDoiTuong",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(encryptedDoc),
-      },
-    );
-
-    if (!res.ok) {
-      const msg = await res.text();
-      throw new Error(msg || "Upload failed");
-    }
-
-    // resetForm();
-
-    return res.json(); // { ok: true, id }
-  };
-
-  async function callRotateKEKWriteBatch(params: {
-    ownerUid: string;
-    updates: Array<{
-      docId: string;
-      encryptedDEK: string;
-      kekIv: string;
-      dekAuthTag: string;
-      kekSalt: string;
-    }>;
-  }) {
-    const res = await fetch(
-      "https://asia-southeast1-infojs-c6205.cloudfunctions.net/rotateKEKWriteBatch",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      },
-    );
-
-    if (!res.ok) {
-      throw new Error(await res.text());
-    }
-
-    return res.json() as Promise<{
-      ok: boolean;
-      total: number;
-      updated: number;
-      failed: Array<{ docId: string; reason: string }>;
-    }>;
-  }
-
-  // return (
-  //   <div className="App" style={{ padding: 24, maxWidth: 800, margin: "0 auto" }}>
-  //     <h2>🔐 Create Sample Doc (Client-side)</h2>
-
-  //     {/* UID */}
-  //     <label>UID</label>
-  //     <input
-  //       type="text"
-  //       value={uid}
-  //       onChange={(e) => setUid(e.target.value)}
-  //       placeholder="user_123"
-  //     />
-
-  //     {/* Secret */}
-  //     <label>Secret (KEK)</label>
-  //     <input
-  //       type="password"
-  //       value={secret}
-  //       onChange={(e) => setSecret(e.target.value)}
-  //       placeholder="••••••••"
-  //     />
-
-  //     {/* Name */}
-  //     <label>Name</label>
-  //     <input
-  //       type="text"
-  //       value={name}
-  //       onChange={(e) => setName(e.target.value)}
-  //       placeholder="Nguyễn Văn An"
-  //     />
-
-  //     {/* Address */}
-  //     <label>Address</label>
-  //     <input
-  //       type="text"
-  //       value={address}
-  //       onChange={(e) => setAddress(e.target.value)}
-  //       placeholder="Hà Nội"
-  //     />
-
-  //     {/* Plaintext */}
-  //     <label>Plaintext</label>
-  //     <textarea
-  //       rows={6}
-  //       value={plaintext}
-  //       onChange={(e) => setPlaintext(e.target.value)}
-  //       placeholder="Nội dung nhật ký (plaintext)"
-  //     />
-
-  //     <button onClick={handleCreate} style={{ marginTop: 16 }}>
-  //       🔐 Create (Encrypt Offline)
-  //     </button>
-
-  //     {/* Error */}
-  //     {error && (
-  //       <p style={{ color: "red", marginTop: 12 }}>{error}</p>
-  //     )}
-
-  //     {/* Result */}
-  //     {result && (
-  //       <>
-  //         <h3>📦 Encrypted Output (JSON)</h3>
-  //         <pre
-  //           style={{
-  //             background: "#111",
-  //             color: "#0f0",
-  //             padding: 16,
-  //             maxHeight: 400,
-  //             overflow: "auto",
-  //           }}
-  //         >
-  //           {JSON.stringify(result, null, 2)}
-  //         </pre>
-  //       </>
-  //     )}
-  //   </div>
-  // );
-  return (
-    <div className="App app-split">
-      {/* LEFT PANEL */}
-      <div className="panel left">
-        <h2>🔐 Create Sample Doc</h2>
-
-        <label>UID</label>
-        <input
-          type="text"
-          value={uid}
-          onChange={(e) => setUid(e.target.value)}
-          placeholder="user_123"
-        />
-
-        <label>Secret (KEK)</label>
-        <input
-          type="password"
-          value={secret}
-          onChange={(e) => setSecret(e.target.value)}
-          placeholder="••••••••"
-        />
-
-        <label>Name</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nguyễn Văn An"
-        />
-
-        <label>Address</label>
-        <input
-          type="text"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Hà Nội"
-        />
-
-        <label>Plaintext</label>
-        <textarea
-          rows={6}
-          value={plaintext}
-          onChange={(e) => setPlaintext(e.target.value)}
-          placeholder="Nội dung nhật ký (plaintext)"
-        />
-
-        <button onClick={handleCreate}>🔐 Create (Encrypt Offline)</button>
-
-        {error && <p className="error">{error}</p>}
-      </div>
-
-      {/* RIGHT PANEL */}
-      <div className="panel right">
-        <h2>📦 Encrypted Output</h2>
-
-        {!encryptedDoc && (
-          <p style={{ opacity: 0.6 }}>Chưa có dữ liệu mã hoá</p>
-        )}
-
-        {encryptedDoc && (
-          <>
-            <div className="json-viewer">
-              {Object.entries(encryptedDoc).map(([key, value]) => (
-                <div className="json-row" key={key}>
-                  <span className="json-key">"{key}"</span>
-                  <span className="json-sep">:</span>
-                  <span className="json-value">
-                    {typeof value === "string"
-                      ? `"${value}"`
-                      : JSON.stringify(value)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="actions">
-              <button
-                onClick={() =>
-                  navigator.clipboard.writeText(
-                    JSON.stringify(encryptedDoc, null, 2),
-                  )
-                }
-              >
-                📋 Copy JSON
-              </button>
-
-              <button
-                className="primary"
-                onClick={async () => {
-                  if (!encryptedDoc) {
-                    alert("❌ Chưa có dữ liệu mã hoá");
-                    return;
-                  }
-
-                  try {
-                    setUploadStatus("⏳ Đang upload...");
-
-                    const result = await uploadEncryptedDoc(encryptedDoc);
-
-                    setUploadStatus(
-                      `✅ Upload thành công (docId: ${result.id})`,
-                    );
-                  } catch (e: any) {
-                    console.error(e);
-                    setUploadStatus("❌ Upload thất bại");
-                  }
-                }}
-              >
-                ☁️ Upload Firebase
-              </button>
-            </div>
-            {uploadStatus && (
-              <p
-                className="upload-status"
-                style={{
-                  marginTop: 8,
-                  color: uploadStatus.startsWith("❌")
-                    ? "red"
-                    : uploadStatus.startsWith("✅")
-                      ? "green"
-                      : "#666",
-                }}
-              >
-                {uploadStatus}
-              </p>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* =========================
-    🔁 ROTATE SECRET (KEK)
-========================= */}
-      <div className="form-block">
-        <h3 className="block-title">🔁 Rotate Secret (KEK)</h3>
-
-        <label>UID</label>
-        <input
-          type="text"
-          placeholder="user_123"
-          value={uidRotate}
-          onChange={(e) => setUidRotate(e.target.value)}
-          disabled={rotateStatus.running}
-        />
-
-        <label>Old Secret</label>
-        <input
-          type="password"
-          placeholder="Secret cũ"
-          value={oldSecret}
-          onChange={(e) => setOldSecret(e.target.value)}
-          disabled={rotateStatus.running}
-        />
-
-        <label>New Secret</label>
-        <input
-          type="password"
-          placeholder="Secret mới"
-          value={newSecret}
-          onChange={(e) => setNewSecret(e.target.value)}
-          disabled={rotateStatus.running}
-        />
-
-        <button
-          className="warning"
-          disabled={rotateStatus.running}
-          onClick={async () => {
-            // =========================
-            // 0️⃣ Validate input
-            // =========================
-            if (!uidRotate || !oldSecret || !newSecret) {
-              alert("❌ Thiếu UID / secret");
-              return;
-            }
-
-            if (oldSecret === newSecret) {
-              alert("❌ Secret mới phải khác secret cũ");
-              return;
-            }
-
-            const ok = window.confirm(
-              "⚠️ Bạn chắc chắn muốn rotate secret?\n" +
-                "Thao tác này không thể hoàn tác.",
-            );
-            if (!ok) return;
-
-            // =========================
-            // 1️⃣ Reset & lock UI
-            // =========================
-            setRotateStatus({
-              total: 0,
-              success: 0,
-              failed: 0,
-              running: true,
+      if (currentUser) {
+        // chỉ fetch khi có user
+        try {
+          getDoc(doc(db, "users", currentUser.uid as string))
+            .then(async (result) => {
+              setUser({ ...result.data(), id: currentUser.uid } as UserModel);
+            })
+            .catch(async () => {
+              await signOut(auth);
+              handleToastWarn(
+                "Tài khoản chưa được cấp quyền, vui lòng liên hệ admin !"
+              );
             });
+        } catch (error) {
+          console.log("error: ", error);
+        }
+      } else {
+        // clear user khi logout
+        setUser(null);
+      }
+    });
+    return () => unsub();
+  }, [setUser]);
 
-            try {
-              // =========================
-              // 2️⃣ Client rotate crypto
-              // =========================
-              const { updates } = await rotateKEKForDoiTuongsClient({
-                ownerUid: uidRotate,
-                oldSecret,
-                newSecret,
-                onProgress: ({ success }) => {
-                  setRotateStatus((prev) => ({
-                    ...prev,
-                    total: prev.total + 1,
-                    success: prev.success + (success ? 1 : 0),
-                    failed: prev.failed + (success ? 0 : 1),
-                  }));
-                },
-              });
-
-              if (updates.length === 0) {
-                alert("ℹ️ Không có document nào để rotate");
-                setRotateStatus((prev) => ({
-                  ...prev,
-                  running: false,
-                  lastRun: Date.now(),
-                }));
-                return;
-              }
-
-              // =========================
-              // 3️⃣ Gửi batch lên CF
-              // =========================
-              const result = await callRotateKEKWriteBatch({
-                ownerUid: uidRotate,
-                updates,
-              });
-
-              // =========================
-              // 4️⃣ Update UI
-              // =========================
-              setRotateStatus((prev) => ({
-                ...prev,
-                running: false,
-                lastRun: Date.now(),
-              }));
-
-              if (result.failed.length > 0) {
-                alert(
-                  `⚠️ Rotate xong nhưng có lỗi\n` +
-                    `✔ Thành công: ${result.updated}\n` +
-                    `❌ Thất bại: ${result.failed.length}`,
-                );
-              } else {
-                alert(`✅ Rotate thành công ${result.updated} documents`);
-              }
-
-              // =========================
-              // 5️⃣ Clear secrets khỏi memory
-              // =========================
-              setOldSecret("");
-              setNewSecret("");
-            } catch (e) {
-              console.error("❌ ROTATE ERROR", e);
-              setRotateStatus((prev) => ({
-                ...prev,
-                running: false,
-              }));
-              alert("❌ Rotate thất bại – xem console");
-            }
-          }}
-        >
-          {rotateStatus.running
-            ? "⏳ Đang rotate..."
-            : "🔁 Xác nhận đổi Secret"}
-        </button>
-      </div>
-
-      {/* =========================
-    📊 ROTATE STATUS
-========================= */}
-      <div className="form-block rotate-status">
-        <h3 className="block-title">📊 Rotate Status</h3>
-
-        {!rotateStatus.lastRun && !rotateStatus.running && (
-          <p className="status muted">Chưa thực hiện</p>
-        )}
-
-        {(rotateStatus.running || rotateStatus.lastRun) && (
-          <ul className="status-list">
-            <li>Documents: {rotateStatus.total}</li>
-            <li>Success: {rotateStatus.success}</li>
-            <li>Failed: {rotateStatus.failed}</li>
-            <li>
-              Last run:{" "}
-              {rotateStatus.lastRun
-                ? new Date(rotateStatus.lastRun).toLocaleString()
-                : "—"}
-            </li>
-          </ul>
-        )}
-      </div>
+  if (authState.isLoading) {
+    return <SpinnerComponent />;
+  }
+  
+  return (
+    <div>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            authState.user ? <Navigate to="/" replace /> : <LoginPage />
+          }
+        />
+        <Route
+          path="/"
+          element={
+            authState.user ? (
+              <HomePage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+      </Routes>
     </div>
-  );
+  )
 }
-
-export default App;
