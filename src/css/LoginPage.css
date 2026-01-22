@@ -1,0 +1,177 @@
+/* =========================
+   🌐 GLOBAL
+========================= */
+
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+  }
+  
+  /* =========================
+     🧩 APP SPLIT LAYOUT
+  ========================= */
+  
+  .App {
+    min-height: 100vh;
+  }
+  
+  .app-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px;
+  }
+  
+  @media (max-width: 900px) {
+    .app-split {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* =========================
+     📦 PANEL
+  ========================= */
+  
+  .panel {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 28px 32px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .panel.left {
+    border-left: 6px solid #2563eb;
+  }
+  
+  .panel.right {
+    border-left: 6px solid #10b981;
+  }
+  
+  /* =========================
+     🧾 HEADINGS
+  ========================= */
+  
+  .panel h2 {
+    margin: 0 0 20px;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  
+  /* =========================
+     📝 FORM
+  ========================= */
+  
+  label {
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  input,
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border 0.15s, box-shadow 0.15s;
+  }
+  
+  input:focus,
+  textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  }
+  
+  input:disabled {
+    background: #f3f4f6;
+    cursor: not-allowed;
+  }
+  
+  /* =========================
+     🔘 BUTTONS
+  ========================= */
+  
+  button {
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background 0.15s, transform 0.1s;
+  }
+  
+  button:active {
+    transform: scale(0.98);
+  }
+  
+  button.primary {
+    background: #2563eb;
+    color: #ffffff;
+  }
+  
+  button.primary:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+  
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* =========================
+     ❌ ERROR
+  ========================= */
+  
+  .error {
+    margin-top: 12px;
+    color: #dc2626;
+    font-size: 0.9rem;
+  }
+  
+  /* =========================
+     🧩 JSON VIEWER
+  ========================= */
+  
+  .json-viewer {
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: #e5e7eb;
+  }
+  
+  .json-row {
+    display: flex;
+    align-items: center;
+    line-height: 1.5;
+  }
+  
+  .json-key {
+    color: #38bdf8;
+  }
+  
+  .json-sep {
+    margin: 0 6px;
+    color: #94a3b8;
+  }
+  
+  .json-value {
+    color: #a7f3d0;
+  }
+  
