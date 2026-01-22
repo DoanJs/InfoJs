@@ -1,6 +1,8 @@
 
 // --------------------------------HELPER------------------------------
 
+import { auth } from "../firebase.config";
+
 const normalizeVN = (str: string): string => {
   return str
     .toLowerCase()
@@ -80,18 +82,22 @@ async function deriveKEK(secret: string, salt: Uint8Array) {
 // ------------------------------------
 
 export async function createSampleDocClient({
-  uid,
   secret,
   name,
   address,
   plaintext,
 }: {
-  uid: string;
   secret: string;
   name: string;
   address: string;
   plaintext: string;
 }) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Chưa đăng nhập");
+  }
+
+  const ownerUid = user.uid;
   // =========================
   // 1️⃣ Sinh DEK (32 bytes)
   // =========================
@@ -145,7 +151,7 @@ export async function createSampleDocClient({
     address,
 
     // 🔐 permission
-    ownerUid: uid,
+    ownerUid,
     sharedWith: [],
     public: false,
   };

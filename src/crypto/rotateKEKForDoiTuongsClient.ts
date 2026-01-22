@@ -1,5 +1,5 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebase.config";
+import { auth, db } from "../firebase.config";
 
 type RotateResult = {
   updates: Array<{
@@ -85,16 +85,21 @@ async function deriveKEK(secret: string, salt: Uint8Array): Promise<CryptoKey> {
 }
 
 export async function rotateKEKForDoiTuongsClient({
-  ownerUid,
   oldSecret,
   newSecret,
   onProgress,
 }: {
-  ownerUid: string;
   oldSecret: string;
   newSecret: string;
   onProgress?: (info: { docId: string; success: boolean; error?: any }) => void;
 }): Promise<RotateResult> {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Chưa đăng nhập");
+  }
+
+  const ownerUid = user.uid;
+
   const q = query(
     collection(db, "doituongs"),
     where("ownerUid", "==", ownerUid),
