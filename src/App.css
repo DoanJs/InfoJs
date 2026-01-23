@@ -270,7 +270,14 @@ button.primary {
   color: #6ee7b7;
   word-break: break-all;
   white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8; /* 👈 tối đa 10 dòng */
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
+
 /* Row cho rotate + status */
 .rotate-row {
   display: grid;
