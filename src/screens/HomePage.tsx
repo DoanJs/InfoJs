@@ -191,7 +191,15 @@ function HomePage() {
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="panel right">
+        <div style={{
+          width: '100%',
+          maxWidth: "100%",
+          whiteSpace:"pre-wrap",
+          wordBreak:"break-word",
+          overflowWrap:"anywhere",
+          lineHeight: 1.6,
+          fontSize: "15px"
+        }} className="panel right">
           <h2>📦 Encrypted Output</h2>
 
           {!encryptedDoc && (
