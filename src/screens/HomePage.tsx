@@ -66,7 +66,7 @@ function HomePage() {
     const idToken = await user.getIdToken();
 
     const res = await fetch(
-      "https://asia-southeast1-infojs-c6205.cloudfunctions.net/uploadEncryptedDoiTuong",
+      "https://uploadencrypteddoituong-25yevkpmeq-as.a.run.app",
       {
         method: "POST",
         headers: {
@@ -103,7 +103,7 @@ function HomePage() {
     const idToken = await user.getIdToken();
 
     const res = await fetch(
-      "https://asia-southeast1-infojs-c6205.cloudfunctions.net/rotateKEKWriteBatch",
+      "https://rotatekekwritebatch-25yevkpmeq-as.a.run.app",
       {
         method: "POST",
         headers: {
